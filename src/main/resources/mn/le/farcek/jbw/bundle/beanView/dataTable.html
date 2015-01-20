@@ -1,0 +1,89 @@
+<div class="dv datatable">
+    <form id="dt_{{tbl.id}}" name="{{tbl.name}}" action="" method="get" class="form">
+        <div class="table-responsive">
+            <table class="table">    
+                <thead>
+                    <tr>
+                        {% for it in tbl.fields%}
+                        <th>    
+                            {% if it.sortable%}
+                            <a href="javascript:;" onclick="$('#sort_{{tbl.id}}_{{it.name}}').val('{{it.nextSort}}'); $('#dt_{{tbl.id}}').submit()">
+                                {{it.title | message}}{%if it.sort == "desc"%} <i class="glyphicon glyphicon-sort-by-attributes-alt"></i> {%endif%}{%if it.sort == "asc"%} <i class="glyphicon glyphicon-sort-by-attributes"></i> {%endif%}
+                            </a>
+                            <input hidden="" id="sort_{{tbl.id}}_{{it.name}}" name="sort_{{tbl.id}}_{{it.name}}" value="{{it.sort}}" />
+                            {%else%}
+                            {{it.title }} 
+                            {%endif%}
+                        </th>
+                        {% endfor%}
+                        <th>                    
+                            <a class="btn btn-default" href="{{tbl.newUrl }}" >
+                                <i class="glyphicon glyphicon-plus"></i>
+                            </a>
+                        </th>
+                    </tr>
+                    <tr>
+
+                        {% for it in tbl.fields%}
+                        <th>    
+                            {% if it.filter == true %}
+                            <input name="filter_{{tbl.id}}_{{it.name}}" class="form-control" value="{{it.filterValue}}" >
+                            {%endif%}
+                        </th>            
+                        {% endfor%}
+                        <th>
+                            <button class="btn btn-default" name="{{'p_'+tbl.id}}" value="1" type="submit">
+                                <i class="glyphicon glyphicon-filter"></i>
+                            </button>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in tbl.list%}
+                    <tr>
+                        {% for it in tbl.fields%}
+                        <td>{{r | property(it.name) }}</td>
+                        {% endfor%}
+                        <td>
+                            <a href="{{tbl.editUrl  }}?_pkKey={{r | property(tbl.pkField.name)}}"><i class="glyphicon glyphicon-pencil"></i></a>
+                            <a href="{{tbl.deleteUrl}}?_pkKey={{r | property(tbl.pkField.name)}}"><i class="glyphicon glyphicon-remove"></i></a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr colspan="{{tbl.totalColumns}}">
+                        <td>no data</td>
+                    </tr>
+                    {% endfor%}
+                </tbody>            
+            </table>
+        </div>
+        <div>
+            <div class="btn-group" role="group" aria-label="...">
+                {{pagination(tbl.pagination, 'p_'+tbl.id)}}
+            </div>
+        </div>
+        <input type="hidden" name="cp_{{tbl.name}}" value="{{tbl.page}}" >
+    </form>
+</div>
+{% macro pagination(pagination, pname)%}
+{%if pagination is not null%}
+
+{%if pagination.hasFirst%}
+<input type="submit" name="{{pname}}" value="1" class="btn btn-default" >
+{%if not pagination.beginBeforeFirst%}<a class="btn btn-default disabled"><span>...</span></a>{%endif%}
+{%endif%}
+
+{% for p in pagination.pages%}
+<input type="submit" name="{{pname}}" value="{{p}}" class="btn btn-{{(p.toString == pagination.currentPage.toString)?'primary disabled':'default'}}" >
+{% endfor%}
+
+{%if pagination.hasLast%}
+{%if not pagination.endAfterLast %}<a class="btn btn-default disabled"><span>...</span></a>{%endif%}
+<input type="submit" name="{{pname}}" value="{{pagination.totalPage}}" class="btn btn-default" >
+{%endif%}
+
+
+{%else%}
+<li class="disabled"><span>pagination object is null</span></li>
+{%endif%}
+{% endmacro%}
